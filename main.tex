@@ -210,7 +210,7 @@ If $A \in \mathbb{R}^{n \times n}$ is symmetric ($A^{T}=A$) and positive definit
 $$
 \mathbf{z}^{T} A \mathbf{z}>0 \text { for all } \mathbf{z} \neq \mathbf{0}
 $$
-it is possible to ecompose the matrix in the following way:
+it is possible to decompose the matrix in the following way:
 $$
 A=L^{T} L.
 $$
@@ -340,6 +340,12 @@ If the elements of $A$ are listed by row, the array JC might be replaced by an a
 \begin{center}
 \includegraphics[max width=\textwidth]{2023_09_05_b72ccc85584d9dc6fb5cg-026}
 \end{center}
+
+\section*{Well-posed linear system}
+A problem is well posed if it admits a unique solution  which depends with continuity on the data.\\ \\
+Consider the linear system Ax $=\mathbf{b}$, where $\mathbf{x}$ and $\mathbf{b}$ are two vectors in $\mathbb{R}^n$, while $\mathbf{A}$ is the matrix $(n \times n)$ of the real coefficients of the system. Suppose that A is nonsingular; in such a case $x$ is the unknown solution $\mathbf{x}$, while the data $d$ are the right-hand side $\mathbf{b}$ and the matrix A, that is, $d=\left\{b_i, a_{i j}, 1 \leq i, j \leq n\right\}$.\\ 
+If $\mathrm{A}$ is well conditioned, solving the linear system $\mathbf{A x}=\mathbf{b}$ is a stable problem with respect to perturbations of the right-hand side b. 
+
 
 \newpage
 
@@ -808,7 +814,7 @@ A possibility to find the minimum $\mathbf{x}$ is provided by the method of stee
 
 \subsection*{Steepest descent}
 The method of steepest descent tries to find an update $\mathbf{x}^{(k+1)}$ in the direction of the steepest descent of our quadratic function, i.e., in the direction of the negative gradient.
-$$-\nabla \Phi\left(\mathbf{x}^{(k)}\right)= - \biggl( \frac{1}{2} \bigl(A^{T} +A \bigl) \mathbf{v} - \mathbf{b} \biggl) =  \mathbf{b}-A \mathbf{x}^{(k)}=\mathbf{r}^{(k)}.$$
+$$-\nabla \Phi\left(\mathbf{x}^{(k)}\right)= - \biggl( \frac{1}{2} \bigl(A^{T} +A \bigl) \mathbf{x}^{(k)} - \mathbf{b} \biggl) =  \mathbf{b}-A \mathbf{x}^{(k)}=\mathbf{r}^{(k)}.$$
 \textbf{Remark}: It would be better  to search in the direction of the error $\mathbf{e}^{(k)}=\mathbf{x}-\mathbf{x}^{(k)}$, but unfortunately the error is unknown. Indeed, for a given $\overline{\mathbf{x}}$, the vector $-\nabla 
 \Phi(\overline{\mathbf{x}})=\overline{\mathbf{r}}$ is the direction of steepest descent, orthogonal to the energy isoline at $\overline{\mathbf{x}}$.\\
 \includegraphics[scale = 0.12,center]{2023_09_05_b72ccc85584d9dc6fb5cg-077} \\ \\
@@ -955,7 +961,7 @@ $$
 $$
 From the above identity, it follows by induction, that
 $$
-\mathbf{r}^{(k)}=p_{k}(A) \mathbf{r}^{(0)} \in \operatorname{span}\left\{\mathbf{r}^{(0)}, A \mathbf{r}^{(0)}, \ldots, A^{k-1} \mathbf{r}^{(0)}\right\}
+\mathbf{r}^{(k)}=p_{k-1}(A) \mathbf{r}^{(0)} \in \operatorname{span}\left\{\mathbf{r}^{(0)}, A \mathbf{r}^{(0)}, \ldots, A^{k-1} \mathbf{r}^{(0)}\right\}
 $$
 where $p_{r}(z)=(1-z)^{r}$ is a polynomial of exact degree $r$.
 From the previous relations, we have that:
@@ -984,7 +990,7 @@ $$
 \textbf{Lemma.} There is a positive integer $\nu=\nu(\mathbf{y}, A)$, called grade of $\mathbf{y}$ with respect to $\mathrm{A}$, such that:
 $$
 \operatorname{dim}\left(\mathscr{K}_{s}(A, y)\right)=\left\{\begin{array}{l}
-s \text { if } s \leq \nu \\
+s \text { if } s < \nu \\
 \nu \text { if } s \geq \nu
 \end{array}\right.
 $$
@@ -999,7 +1005,8 @@ Here, "converge" may also mean that after a finite number of steps, $\mathbf{r}^
 $$
 \mathbf{x}^{(k)}=\mathbf{x}^{(0)}+p_{k-1}(A) \mathbf{r}^{(0)}
 $$
-with a polynomial $p_{k-1}(A)$ of exact degree $k-1$. For some $k, \mathbf{x}^{(k)}$ may not exist or $p_{k-1}(A)$ may have lower degree.
+with a polynomial $p_{k-1}(A)$ of exact degree $k-1$. For some $k, \mathbf{x}^{(k)}$ may not exist or $p_{k-1}(A)$ may have lower degree.\\ \\
+In some widely used Krylov space solvers (e.g., BICG) there may exist exceptional situations, where for some $n$ the iterate $\mathbf{x}_n$ and the residual $\mathbf{r}_n$ are not defined. In other Krylov space solvers (e.g., CR), there may be indices where $\mathbf{x}_n$ exists, but the polynomial $q_{n-1}$ is of lower degree than $n-1$.
 \subsection*{Krylov space methods}
 When applied to large real-world problems Krylov space solvers often converge very slowly - if at all. In practice, Krylov space solvers are therefore nearly always applied with preconditioning:
 $$
@@ -1056,7 +1063,8 @@ The use of the transpose of A allows us to construct a dual Krylov space that is
 However, this comes at a cost: while the CG method requires one matrix-vector multiplication per iteration (by $A$), the BiCG method requires two $\bigl( $one by $A$ and one by $A^T \bigl)$. This makes the BiCG method more computationally expensive than the CG method.
 \subsection*{The BiCGSTAB method}
 The biconjugate gradient stabilized method (BiCGSTAB), is a variant of the biconjugate gradient method (BiCG) and has faster and smoother convergence than the original BiCG.\\
-It is unnecessary to explicitly keep track of the residuals and search directions of BiCG. In other words, the BiCG iterations can be performed implicitly. \\
+It is unnecessary to explicitly keep track of the residuals and search directions of BiCG. In other words, the BiCG iterations can be performed implicitly. \\ \\
+In other words, BiCGSTAB simplifies the process by reducing the amount of data that needs to be stored and manipulated, leading to potentially significant savings in computational resources. This makes it a more efficient method for solving nonsymmetric linear systems. \\ \\
 
 Choose $\mathbf{x}^{(0)}, \hat{\mathbf{x}}^{(0)}, \hat{\mathbf{b}}$,
 
@@ -1140,7 +1148,7 @@ $$
 \chapter{Elements of Multigrid}
 This chapter follows closely the first three chapters of the following book: "A Multigrid Tutorial: Second Edition", by  William L. Briggs, Van Emden Henson, Steve F. McCormick. It is recommended to read them to gain a deeper understanding.
 \\ \\
-It is possible to expand arbitrary vectors in terms of a set of eigenvectors of the iteration matrix, if it has full rank, as it happens in many physical problems.
+It is possible to expand arbitrary vectors in terms of a set of eigenvectors of the  matrix, if it has full rank, as it happens in many physical problems.
 Let $\textbf{e}^{(0)}$ be the error in an initial guess used in a iterative method. Then
 it is possible to represent $\textbf{e}^{(0)}$
  using the eigenvectors of $R$ in the form:
@@ -1167,7 +1175,7 @@ $$
 which says that we can relax directly on the error by using the residual equation. There is another argument that justifies the use of the residual equation.
 Relaxation on the original equation $A \mathbf{u}=\mathbf{f}$ with an arbitrary initial guess $\mathbf{v}$ is equivalent to relaxing on the residual equation $A \mathbf{e}=\mathbf{r}$ with the specific initial guess $\mathbf{e}=\mathbf{0}$. This intimate connection between the original and the residual equations further motivates the use of the residual equation.\\ \\
 Given the equation $A \mathbf{u} = \mathbf{f}$, where $A$ is the coefficient matrix, $\mathbf{u}$ is the unknown vector, and $\mathbf{f}$ is the right-hand side vector. If $\mathbf{v}$ is an approximation to $\mathbf{u}$, the error $\mathbf{e}$ can be defined as $\mathbf{e} = \mathbf{u} - \mathbf{v}$. Substituting $\mathbf{u} = \mathbf{v} + \mathbf{e}$ into the original equation and simplifying gives $A\mathbf{e} = \mathbf{f} - A\mathbf{v} = \mathbf{r}$, which is the residual equation.\\ \\
-This demonstrates that relaxing directly on the error using the residual equation is equivalent to relaxing on the original equation with an arbitrary initial guess, as both the error and the residual are linked through the same linear system governed by matrix $A$."\\ \\
+This demonstrates that relaxing directly on the error using the residual equation is equivalent to relaxing on the original equation with an arbitrary initial guess, as both the error and the residual are linked through the same linear system governed by matrix $A$"\\ \\
 We must now gather these loosely connected ideas. We know that many relaxation schemes possess the smoothing property. This leads us to consider using coarser grids during the computation to focus the relaxation on the oscillatory components of the error. In addition, there seems to be good reason to involve the residual equation in the picture. We now try to give these ideas a little more definition by proposing two strategies. \\ \\
 We begin by proposing a strategy that uses coarse grids to obtain better initial guesses.
 
@@ -1660,7 +1668,7 @@ $$
 $$
 
 \section*{Many Overlapping Subdomains}
-To achieve a higher degree of parallelism with the Schwarz method, we can apply a two-domain algorithm recursively or use many subdomains. If there are $p$ overlapping subdomains, then we define matrices $R_{i}$ and $A_{i}$ as before, where $i=1, \ldots, p$. The Additive Schwarz preconditioner then takes the form $$P_{a d}=\sum_{i=1, \ldots, p} R_{i}^{T} A_{i}^{-1} R_{i}$$
+To achieve a higher degree of parallelism with the Schwarz method, we can apply a two-domain algorithm recursively or use many subdomains. If there are $p$ overlapping subdomains, then we define matrices $R_{i}$ and $A_{i}$ as before, where $i=1, \ldots, p$. The Additive Schwarz preconditioner then takes the form $$P_{a d}^{-1}=\sum_{i=1, \ldots, p} R_{i}^{T} A_{i}^{-1} R_{i}$$
 The resulting generalization of the block-Jacobi iteration is highly parallel, but not algorithmically scalable because the convergence rate degrades as $p$ grows. The convergence rate can be restored by using a coarse grid correction to provide global coupling. \\
 Multiplicative Schwarz iteration for $p$ domains is defined analogously. As with classical Gauss-Seidel vs. Jacobi, multiplicative Schwarz has a faster convergence rate than the corresponding additive Schwarz (though it still requires coarse grid correction to remain scalable). Unfortunately, multiplicative Schwarz appears to provide no parallelism, as $p$ sub-problems per iteration must be solved sequentially. As with classical Gauss-Seidel, parallelism can be introduced by coloring subdomains to identify independent sub-problems that can be solved simultaneously.
 
@@ -2137,16 +2145,16 @@ The reference for this theorem is Theorem 27.1 from the Numerical Linear Algebra
 
 \section*{Deflation method}
 
-Remark 5.3 (Householder deflation for power iterations) The elementary Householder tranformations can be conveniently employed to compute the first (largest or smallest) eigenvalues of a given matrix $A \in \mathbb{R}^{n \times n}$. Assume that the eigenvalues of A are ordered as in (5.16) and suppose that the eigenvalue/eigenvector pair $\left(\lambda_1, \mathbf{x}_1\right)$ has been computed using the power method. Then the matrix A can be transformed into the following block form (see for the proof [Dat95], Theorem 8.5.4, p. 418)
+The elementary Householder tranformations can be conveniently employed to compute the first (largest or smallest) eigenvalues of a given matrix $A \in \mathbb{R}^{n \times n}$. Assume that the eigenvalues of A are ordered as previously stated and suppose that the eigenvalue/eigenvector pair $\left(\lambda_1, \mathbf{x}_1\right)$ has been computed using the power method. Then the matrix A can be transformed into the following block form:
 $$
 \mathrm{A}_1=\mathrm{HAH}=\left(\begin{array}{ll}
 \lambda_1 & \mathbf{b}^T \\
 0 & \mathrm{~A}_2
 \end{array}\right)
 $$
-where $\mathbf{b} \in \mathbb{R}^{n-1}, \mathrm{H}$ is the Householder matrix such that $\mathrm{Hx}_1=\alpha \mathbf{x}_1$ for some $\alpha \in \mathbb{R}$, the matrix $\mathrm{A}_2 \in \mathbb{R}^{(n-1) \times(n-1)}$ and the eigenvalues of $\mathrm{A}_2$ are the same as those of $\mathrm{A}$ except for $\lambda_1$. The matrix $\mathrm{H}$ can be computed using (5.38) with $\mathbf{v}=\mathbf{x}_1 \pm\left\|\mathbf{x}_1\right\|_2 \mathbf{e}_1$.
+where $\mathbf{b} \in \mathbb{R}^{n-1}, \mathrm{H}$ is the Householder matrix such that $\mathrm{Hx}_1=\alpha \mathbf{x}_1$ for some $\alpha \in \mathbb{R}$, the matrix $\mathrm{A}_2 \in \mathbb{R}^{(n-1) \times(n-1)}$ and the eigenvalues of $\mathrm{A}_2$ are the same as those of $\mathrm{A}$ except for $\lambda_1$. The matrix $\mathrm{H}$ can be computed using with $\mathbf{v}=\mathbf{x}_1 \pm\left\|\mathbf{x}_1\right\|_2 \mathbf{e}_1$.
 
-The deflation procedure consists of computing the second dominant (subdominant) eigenvalue of $\mathrm{A}$ by applying the power method to $\mathrm{A}_2$ provided that $\left|\lambda_2\right| \neq\left|\lambda_3\right|$. Once $\lambda_2$ is available, the corresponding eigenvector $\mathbf{x}_2$ can be computed by applying the inverse power iteration to the matrix $\mathrm{A}$ taking $\mu=\lambda_2$ (see Section 5.3.2) and proceeding in the same manner with the remaining eigenvalue/eigenvector pairs. 
+The deflation procedure consists of computing the second dominant (subdominant) eigenvalue of $\mathrm{A}$ by applying the power method to $\mathrm{A}_2$ provided that $\left|\lambda_2\right| \neq\left|\lambda_3\right|$. Once $\lambda_2$ is available, the corresponding eigenvector $\mathbf{x}_2$ can be computed by applying the inverse power iteration to the matrix $\mathrm{A}$ taking $\mu=\lambda_2$  and proceeding in the same manner with the remaining eigenvalue/eigenvector pairs. 
 
 \section*{Inverse power method}
 For some applications, the smallest eigenvalue of a matrix is required rather than the largest. We use the fact that the eigenvalues of $A^{-1}$ are the reciprocals of those of $A$.
@@ -2257,7 +2265,7 @@ The FLOP (Floating Point Operations) count for the MGS process is approximately 
 \section*{Schur Decomposition}
 If $A \in \mathbb{C}^{n \times n}$, then there exists a unitary matrix $U \in \mathbb{C}^{n \times n}$ such that $U^H AU = T$, where $T$ is upper triangular. The diagonal elements of $T$ are the eigenvalues of $A$. The columns of $U$, denoted as $[u_1, u_2, \ldots, u_n]$, are called Schur vectors. They are generally not eigenvectors.
 \section*{Schur Vectors}
-The $k$-th column of $U^H AU = T$ reads as $A u_k = \lambda_k u_k + \sum_{i=1}^{k-1} t_{ik} u_i$. This implies that $A u_k \in \text{span} \{u_1, \ldots, u_k\}$ for all $k$. The first Schur vector is an eigenvector of $A$. The first $k$ Schur vectors form an invariant subspace for $A$.
+The $k$-th column of $U^H AU = T$ reads as $A u_k = \lambda_k u_k + \sum_{i=1}^{k-1} t_{ik} u_i$. This implies that $A u_k \in \text{span} \{u_1, \ldots, u_k\}$ for all $k$. The first Schur vector is an eigenvector of $A$. The first $k$ Schur vectors form an invariant subspace for $A$. The Schur decomposition is not unique.
 
 \section*{Basic QR algorithm}
 Let $A \in \mathbb{C}^{n \times n}$. The QR algorithm computes an upper triangular matrix $T$ and a unitary matrix $U$ such that $A=U T U^{H}$ is the Schur decomposition of $A$.
@@ -2402,8 +2410,8 @@ $$
 \end{array}\right]
 \end{aligned}
 $$
-Lanczos algorithm: \\
-$\mathbf{r}_{0}=\mathbf{q}_{1} ; \mathbf{q}_{0}=\mathbf{0} ; \beta_{0}=1 ;$
+\textbf{Lanczos algorithm}: \\
+$\mathbf{q}_{q}=\mathbf{r}_{0} ; \mathbf{q}_{0}=\mathbf{0} ; \beta_{0}=1 ;$
 
 for $(k=1, \ldots, n)$
 
@@ -2457,7 +2465,7 @@ $$
 $$
 The above problem is equivalent to the following:
 $$
-\min \|A \alpha-\mathrm{b}\|_{2}^{2}
+\min \|A \mathbf{\alpha}-\mathbf{b}\|_{2}^{2}
 $$
 with
 $$
@@ -2466,7 +2474,7 @@ A=\left[\begin{array}{cc}
 1 & T_{2} \\
 \vdots & \vdots \\
 1 & T_{m}
-\end{array}\right], \quad \alpha=\left[\begin{array}{c}
+\end{array}\right], \quad \mathbf{\alpha}=\left[\begin{array}{c}
 \alpha_{0} \\
 \alpha_{1}
 \end{array}\right], \quad \mathbf{b}=\left[\begin{array}{c}
@@ -2532,7 +2540,7 @@ From the definition we have:
 $$
 \begin{aligned}
 \Phi(\mathbf{y}) & =(A \mathbf{y}-\mathbf{b})^{T}(A \mathbf{y}-\mathbf{b}) = \mathbf{y}^{T} A^{T} A \mathbf{y} - \mathbf{y}^TA^T\mathbf{b}-\mathbf{b}^T A \mathbf{y}+\mathbf{b}^{T} \mathbf{b} =  \\
-&= \mathbf{y}^{T} A^{T} A \mathbf{y}- (A\mathbf{y})^T\mathbf{b}  -\mathbf{b}^T A \mathbf{y}- \mathbf{b}^{T} \mathbf{b}=\mathbf{y}^{T} A^{T} A \mathbf{y}-2 \mathbf{y}^{T} A \mathbf{b}+\mathbf{b}^{T} \mathbf{b}.
+&= \mathbf{y}^{T} A^{T} A \mathbf{y}- (A\mathbf{y})^T\mathbf{b}  -\mathbf{b}^T A \mathbf{y}+ \mathbf{b}^{T} \mathbf{b}=\mathbf{y}^{T} A^{T} A \mathbf{y}-2 \mathbf{b}^{T} A \mathbf{y}+\mathbf{b}^{T} \mathbf{b}.
 \end{aligned}
 $$
 Therefore:
@@ -2608,11 +2616,11 @@ $$
 \mathrm{U}^H \mathrm{AV}=\Sigma=\operatorname{diag}\left(\sigma_1, \ldots, \sigma_p\right) \in \mathbb{C}^{m \times n} \quad \text { with } p=\min (m, n)
 $$
 and $\sigma_1 \geq \ldots \geq \sigma_p \geq 0$. This is called Singular Value Decomposition or ( $S V D$ ) of $\mathrm{A}$ and the numbers $\sigma_i$ (or $\sigma_i(\mathrm{~A})$ ) are called singular values of $\mathrm{A}$.\\ \\
-If $\mathrm{A}$ is a real-valued matrix, $\mathrm{U}$ and $\mathrm{V}$ will also be real-valued and in $\mathrm{U}^T$ must be written instead of $\mathrm{U}^H$. The following characterization of the singular values holds
+If $\mathrm{A}$ is a real-valued matrix, $\mathrm{U}$ and $\mathrm{V}$ will also be real-valued and $\mathrm{U}^T$ must be written instead of $\mathrm{U}^H$. The following characterization of the singular values holds
 $$
 \sigma_i(\mathrm{~A})=\sqrt{\lambda_i\left(\mathrm{~A}^H \mathrm{~A}\right)}, \quad i=1, \ldots, n . \ \ (8.1)
 $$
-Indeed, from the SVD decomposition t follows that $\mathrm{A}=\mathrm{U} \Sigma \mathrm{V}^H, \mathrm{~A}^H=\mathrm{V} \Sigma \mathrm{U}^H$ so that, $\mathrm{U}$ and $\mathrm{V}$ being unitary, $\mathrm{A}^H \mathrm{~A}=\mathrm{V} \Sigma^2 \mathrm{~V}^H$, that is, $\lambda_i\left(\mathrm{~A}^H \mathrm{~A}\right)=\lambda_i\left(\Sigma^2\right)=\left(\sigma_i(\mathrm{~A})\right)^2$. Since $\mathrm{AA}^H$ and $\mathrm{A}^H \mathrm{~A}$ are hermitian matrices, the columns of $\mathrm{U}$, called the left singular vectors of $\mathrm{A}$, turn out to be the eigenvectors of $\mathrm{AA}^H$ and, therefore, they are not uniquely defined. The same holds for the columns of $\mathrm{V}$, which are the right singular vectors of $\mathrm{A}$.\\ \\
+Indeed, from the SVD decomposition it follows that $\mathrm{A}=\mathrm{U} \Sigma \mathrm{V}^H, \mathrm{~A}^H=\mathrm{V} \Sigma \mathrm{U}^H$ so that, $\mathrm{U}$ and $\mathrm{V}$ being unitary, $\mathrm{A}^H \mathrm{~A}=\mathrm{V} \Sigma^2 \mathrm{~V}^H$, that is, $\lambda_i\left(\mathrm{~A}^H \mathrm{~A}\right)=\lambda_i\left(\Sigma^2\right)=\left(\sigma_i(\mathrm{~A})\right)^2$. Since $\mathrm{AA}^H$ and $\mathrm{A}^H \mathrm{~A}$ are hermitian matrices, the columns of $\mathrm{U}$, called the left singular vectors of $\mathrm{A}$, turn out to be the eigenvectors of $\mathrm{AA}^H$ and, therefore, they are not uniquely defined. The same holds for the columns of $\mathrm{V}$, which are the right singular vectors of $\mathrm{A}$.\\ \\
 Relation (8.1) implies that if $\mathrm{A} \in \mathbb{C}^{n \times n}$ is hermitian with eigenvalues given by $\lambda_1, \lambda_2, \ldots, \lambda_n$, then the singular values of A coincide with the modules of the eigenvalues of $\mathrm{A}$. Indeed because $\mathrm{AA}^H=\mathrm{A}^2, \sigma_i=\sqrt{\lambda_i^2}=\left|\lambda_i\right|$ for $i=1, \ldots, n$. As far as the rank is concerned, if
 $$
 \sigma_1 \geq \ldots \geq \sigma_r>\sigma_{r+1}=\ldots=\sigma_p=0,
@@ -2645,7 +2653,7 @@ If $r$ is the number of nonzero singular values $\sigma_{i}$ of $\mathrm{A}$, th
 $$
 \left\|\Sigma \mathbf{w}-U^{T} \mathbf{b}\right\|_{2}^{2}=\sum_{i=1}^{r}\left(\sigma_{i} w_{i}-\left(U^{T} \mathbf{b}\right)_{i}\right)^{2}+\sum_{i=r+1}^{p}\left(\left(U^{T} \mathbf{b}\right)_{i}\right)^{2}
 $$
-which is minimum if $\sigma_{i} w_{i}-\left(U^{T} \mathbf{b}\right)_{i}=0 \quad \forall i=1, \ldots, r$. Moreover, it is clear that among the vectors $\mathbf{W}$ of $\mathbb{R}^{n}$ having the first $r$ components fixed, the one with minimal Euclidean norm has the remaining $n-r$ components equal to zero. Thus the solution vector is $\mathbf{w}^{*}=\Sigma^{\dagger} U^{T} \mathbf{b}$, that is:
+which is minimum if $\sigma_{i} w_{i}-\left(U^{T} \mathbf{b}\right)_{i}=0 \quad \forall i=1, \ldots, r$. Moreover, it is clear that among the vectors $\mathbf{W}$ of $\mathbb{R}^{n}$ having the first $r$ components fixed, the one with minimal Euclidean norm has the remaining $n-r$ components equal to zero. Thus the solution vector, satisfying both the two previously stated conditions, is $\mathbf{w}^{*}=\Sigma^{\dagger} U^{T} \mathbf{b}$, that is:
 $$
 \mathbf{x}^{*}=V \Sigma^{\dagger} U^{T} \mathbf{b}=A^{\dagger} \mathbf{b},
 $$
@@ -2673,10 +2681,10 @@ The QR factorization with column pivoting is not directly used for the eigenvalu
   
 \item Apply QR factorization with column pivoting: This step is used to orthonormalize the columns of U. The QR factorization decomposes a matrix into a product of an orthogonal matrix and an upper triangular matrix. When applied to our computed U, it gives us an orthogonal matrix whose columns are orthonormal vectors spanning the same space as the original vectors. The column pivoting is used for numerical stability, ensuring that we avoid dividing by small numbers.  
 \end{enumerate}  
-When you have very small singular values, squaring them (as you might do when working with the normal matrix ATA in SVD) can lead to even smaller numbers. This can cause problems in numerical computations due to the limitations of floating-point precision, leading to large errors or instability. A possible remedy is to proceed in two steps.\\ \\
+When you have very small singular values, squaring them (as you might do when working with the normal matrix $A^TA$ in SVD) can lead to even smaller numbers. This can cause problems in numerical computations due to the limitations of floating-point precision, leading to large errors or instability. A possible remedy is to proceed in two steps.\\ \\
 The first step uses Householder reflections to reduce the matrix $A \in \mathbb{R}^{m \times n}$, for $m \geq n$, to a bidiagonal form:
 $$
-A=U B V^T, \quad U \in \mathbb{R}^{m \times n} \text {, and } B, V \in \mathbb{R}^{n \times n},
+A=U B V^T, \quad U \in \mathbb{R}^{m \times m} \text {, } B \in \mathbb{R}^{m \times n}, \quad V \in \mathbb{R}^{n \times n},
 $$
 where $U$ is orthonormal, $V$ is orthogonal and $B$ is bidiagonal
 $$
@@ -2688,7 +2696,7 @@ B=\left[\begin{array}{ccccc}
 & & & & \psi_n
 \end{array}\right] .
 $$
-This process is called bidiagonalization. The second step is the application of a fast algorithm for computing the singular value decomposition of a bidiagonal matrix
+This process is called bidiagonalization. The second step is the application of a fast algorithm for computing the singular value decomposition of a bidiagonal matrix.
 It follows that $T=B^{T} B$ is symmetric and tridiagonal.\\
 We could then apply the (symmetric) QR algorithm directly to T.\\ \\
 After bidiagonalization, SVD of the bidiagonal matrix has to be performed to complete the task of computing the singular value decomposition of a general matrix:
