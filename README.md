@@ -1,4 +1,2 @@
-# Numerical-Linear-Algebra
-This repository contains the lecture notes for the Numerical Analysis course held at Polytechnique University of Milan during the academic year 2023-2024 by Professor Paola Antonietti. 
-The most up to date version of this notes is available at this [link](https://www.overleaf.com/read/wnkgdbzwhdtd).
-
+This repository contains the lecture notes for the course on numerical linear algebra, taught by Professor Paola Antonietti at Polytechnic University of Milan during the 2023/24 academic year, with minor additions and modifications
+The intellectual property remains with the aforementioned professor, who has not reviewed this document. It is intended solely as a supplementary resource for the lectures, created by students for students, without any claims to replace official textbooks or attendance in the lectures. These notes are taken from the lectures and most of the illustrations are based on the professor's drawings and slides, to whom the intellectual property also belongs. 
